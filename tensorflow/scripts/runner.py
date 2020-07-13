@@ -12,7 +12,7 @@ import tensorflow as tf
 
 from .data.dataloader import DataReaderPatchWiseMP
 from .data.data_utils import ap2one, parse_json_db, normalize_slc_by_tanhmz, readFloat, readFloatComplex, readShortComplex
-from .model.model_config import Config
+from .model.model_config import ConfigSmall
 from .model.deepinsar import Model
 
 # Parsing all arguement and loding corresponding model config db files

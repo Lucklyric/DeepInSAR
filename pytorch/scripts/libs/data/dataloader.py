@@ -90,6 +90,11 @@ def readFloatRandomPathces(fileName, width=1, num_sample=1, patch_size=1, rows=N
             patches.append(np.reshape(img, [patch_size, patch_size]))
     return patches, rows, cols, height
 
+def ap2one(ifg):
+    ifg_phase = np.angle(ifg)
+    ifg = 1. * np.exp(1j * ifg_phase)
+    return ifg, np.real(ifg), np.imag(ifg)
+
 class SimInSARDB(Dataset):
     def __init__(self, patch_size, sim_db_root_dir, fake_length, db_width):
         self.all_noisy_ifg_paths = glob.glob('{}/**/*.noisy'.format(sim_db_root_dir), recursive=True)
@@ -111,8 +116,17 @@ class SimInSARDB(Dataset):
         slc2, rs, cs, h = readFloatComplexRandomPathces(slc2_path, width=self.db_width, patch_size=self.patch_size, num_sample=1, rows=rs, cols=cs, height=h)
         filt, rs, cs, h = readFloatComplexRandomPathces(clean_path, width=self.db_width, patch_size=self.patch_size, num_sample=1, rows=rs, cols=cs, height=h)
         coh, rs, cs, h = readFloatRandomPathces(coh_path, width=self.db_width, patch_size=self.patch_size, num_sample=1, rows=rs, cols=cs, height=h)
+        ifg, ifg_real, ifg_imag = ap2one(np.asarray(ifg))
 
-        return {'ifg': np.asarray(ifg), 'slc1': np.asarray(slc1), 'slc2': np.asarray(slc2), 'clean': np.asarray(filt), 'coh': np.asarray(coh)}
+        filt_ifg, clean_real, clean_imag = ap2one(np.asarray(filt))
+
+        return {'ifg_real': ifg_real.astype(np.float32),
+                'ifg_imag': ifg_imag.astype(np.float32),
+                'slc1': np.abs(np.asarray(slc1)).astype(np.float32), 
+                'slc2': np.abs(np.asarray(slc2)).astype(np.float32),
+                'clean_real': clean_real.astype(np.float32),
+                'clean_imag': clean_imag.astype(np.float32),
+                'coh': np.asarray(coh).astype(np.float32)}
 
     def parse_path(self, noisy_path):
         noisy_path_tokens = noisy_path.split('/')
