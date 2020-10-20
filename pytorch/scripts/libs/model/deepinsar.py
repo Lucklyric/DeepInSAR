@@ -131,7 +131,7 @@ class DeepInSAR(AutoModel):
         real, imag, coh = self.forward(observation)
 
         loss_r = ((clean_real - observation[:,0,:,:] - real)**2).mean()/2
-        loss_i = ((clean_real - observation[:,1,:,:] - real)**2).mean()/2
+        loss_i = ((clean_imag - observation[:,1,:,:] - imag)**2).mean()/2
         if (self.hparams.coh_thresh > 0):
             target_coh[target_coh<self.hparams.coh_thresh] = 0
             target_coh[target_coh>=self.hparams.coh_thresh] = 1
